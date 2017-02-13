@@ -5,10 +5,12 @@ import com.nikesh.musicplaylistapi.constants.ApplicationConstants.UserResourceCo
 import com.nikesh.musicplaylistapi.dto.request.UserRequestDTO;
 import com.nikesh.musicplaylistapi.dto.response.UserResponseDTO;
 import com.nikesh.musicplaylistapi.entities.User;
+import com.nikesh.musicplaylistapi.exception.BadDataException;
+import com.nikesh.musicplaylistapi.exception.DuplicateDataException;
 import com.nikesh.musicplaylistapi.exception.NoRecordFoundException;
 import com.nikesh.musicplaylistapi.service.UserService;
+import com.nikesh.musicplaylistapi.utility.UserHelper;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +21,14 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.lang.reflect.Type;
 import java.util.Collection;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.EXPECTATION_FAILED;
 
 /**
+ * Endpoints to handle {@link User} related activities.
+ *
  * @author Nikesh Maharjan
  *         nikeshmhr@gmail.com
  */
@@ -53,23 +56,30 @@ public class UserController {
      * @throws MethodArgumentNotValidException if value of request body is not valid.
      */
     @PostMapping(value = UserResourceConstants.USER_COLLECTION_BASE)
-    public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Valid UserRequestDTO userRequest) throws MethodArgumentNotValidException {
-        // Convert to entity.
-        User user = modelMapper.map(userRequest, User.class);
-        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+    public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Valid UserRequestDTO userRequest)
+            throws MethodArgumentNotValidException {
 
-        // Persist.
-        User createdUser = userService.createUser(user);
-
-        if (createdUser != null) {
-            logger.info("User created successfully. Created User :: " + createdUser);
-            UserResponseDTO createdUserDTO = modelMapper.map(createdUser, UserResponseDTO.class);
-
-            return new ResponseEntity<>(createdUserDTO, CREATED);
+        // Check if user with provided username already exists.
+        if (userService.isUsernameExists(userRequest.getUsername())) {
+            throw new DuplicateDataException("Username '" + userRequest.getUsername() + "' already exists.");
         } else {
-            logger.debug("Failed to create user with properties " + userRequest);
+            // Convert to entity.
+            User user = modelMapper.map(userRequest, User.class);
+            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
-            return new ResponseEntity<>(EXPECTATION_FAILED);
+            // Persist.
+            User createdUser = userService.createUser(user);
+
+            if (createdUser != null) {
+                logger.info("User created successfully. Created User :: " + createdUser);
+                UserResponseDTO createdUserDTO = modelMapper.map(createdUser, UserResponseDTO.class);
+
+                return new ResponseEntity<>(createdUserDTO, CREATED);
+            } else {
+                logger.debug("Failed to create user with properties " + userRequest);
+
+                return new ResponseEntity<>(EXPECTATION_FAILED);
+            }
         }
     }
 
@@ -86,12 +96,7 @@ public class UserController {
         if (allUsers.isEmpty()) {
             throw new NoRecordFoundException("Users not found.");
         } else {
-            Type listType = new TypeToken<Collection<UserResponseDTO>>() {
-            }.getType();
-
-            Collection<UserResponseDTO> responseDTO = modelMapper.map(allUsers, listType);
-
-            return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+            return new ResponseEntity<>(UserHelper.convertToResponseList(allUsers, modelMapper), HttpStatus.OK);
         }
 
     }
@@ -113,6 +118,43 @@ public class UserController {
             UserResponseDTO responseDTO = modelMapper.map(userById, UserResponseDTO.class);
 
             return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+        }
+    }
+
+    /**
+     * Resource URI to update the information of existing user.
+     *
+     * @param userId         id of the user to update details for
+     * @param userRequestDTO updated information of user
+     * @return updated user information
+     * @throws MethodArgumentNotValidException if any of the properties of request body is not valid
+     */
+    @PutMapping(value = UserResourceConstants.USER_BY_ID)
+    public ResponseEntity<UserResponseDTO> updateUser(
+            @PathVariable Long userId,
+            @RequestBody @Valid UserRequestDTO userRequestDTO)
+            throws MethodArgumentNotValidException {
+
+        // Check if user with provided id exists.
+        // Only perform update action if it exists.
+        if (userService.isUserExists(userId)) {
+            // If provided username already exists then throw duplicate username exception
+            if (!userService.isUsernameValidForExistingUser(userRequestDTO.getUsername(), userId)) {
+                throw new DuplicateDataException("Username '" + userRequestDTO.getUsername() + "' already exists.");
+            } else {
+                // Convert request object to persistable entity.
+                User user = modelMapper.map(userRequestDTO, User.class);
+                user.setId(userId);
+                user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+
+                // Update/Persist with id set (Primary key set)...
+                User persistedUser = userService.updateUser(user);
+
+                return new ResponseEntity<>(modelMapper.map(persistedUser, UserResponseDTO.class), HttpStatus.OK);
+            }
+        } else {    // Otherwise throw BadRequest exception.
+            logger.debug("User with user id '" + userId + "' does not exists.");
+            throw new BadDataException("User with user id '" + userId + "' does not exists.");
         }
     }
 

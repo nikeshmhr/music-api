@@ -1,7 +1,7 @@
 package com.nikesh.musicplaylistapi.exception;
 
-import com.nikesh.musicplaylistapi.dto.response.error.ValidationErrorDTO;
 import com.nikesh.musicplaylistapi.dto.response.error.ErrorResponse;
+import com.nikesh.musicplaylistapi.dto.response.error.ValidationErrorDTO;
 import com.nikesh.musicplaylistapi.factory.ErrorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -44,6 +44,16 @@ public class RestExceptionHandler {
     @ExceptionHandler(NoRecordFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoRecordFoundException(NoRecordFoundException ex) {
         return new ResponseEntity<>(ErrorFactory.getErrorResponse(ex, HttpStatus.NOT_FOUND), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BadDataException.class)
+    public ResponseEntity<ErrorResponse> handleBadDataException(BadDataException ex) {
+        return new ResponseEntity<>(ErrorFactory.getErrorResponse(ex, HttpStatus.BAD_REQUEST), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DuplicateDataException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateDataException(DuplicateDataException ex) {
+        return new ResponseEntity<>(ErrorFactory.getErrorResponse(ex, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
     }
 
     private Collection<ValidationErrorDTO> processFieldErrors(List<FieldError> fieldErrors) {

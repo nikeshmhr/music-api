@@ -1,13 +1,14 @@
 package com.nikesh.musicplaylistapi;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 
 /**
  * @author Nikesh Maharjan
  */
-@SpringBootApplication(exclude = org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration.class)
+@SpringBootApplication(exclude = SecurityAutoConfiguration.class)
 public class Application extends SpringBootServletInitializer {
 
     // HELPS TO RUN SPRING BOOT APPLICATION AS WAR.

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Nikesh Maharjan
@@ -42,6 +43,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user) {
         return userRepo.save(user);
+    }
+
+    @Override
+    public boolean isUserExists(Long userId) {
+        return userRepo.findOne(userId) != null;
+    }
+
+    @Override
+    public boolean isUsernameExists(String username) {
+        return userRepo.findByUsername(username) != null;
+    }
+
+    @Override
+    public boolean isUsernameValidForExistingUser(String newUserName, Long existingUserId) {
+        List<User> existingUserWithNewUsername = userRepo.findByUsernameAndIgnoreUserId(newUserName, existingUserId);
+        return existingUserWithNewUsername.isEmpty();
     }
 
 }

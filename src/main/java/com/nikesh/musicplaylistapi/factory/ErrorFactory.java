@@ -10,13 +10,19 @@ import org.springframework.http.HttpStatus;
 public class ErrorFactory {
 
     public static ErrorResponse getErrorResponse(Throwable throwable, HttpStatus httpStatus) {
+        return new ErrorResponse(throwable.getMessage(), httpStatus.value(), httpStatus);
 
-        switch (httpStatus) {
-            case NOT_FOUND:
-                return new ErrorResponse(throwable.getMessage(), httpStatus.value(), httpStatus);
-            default:
-                return null;
-        }
+        // TODO cleanup this mess
+//        switch (httpStatus) {
+//            case NOT_FOUND:
+//                return new ErrorResponse(throwable.getMessage(), httpStatus.value(), httpStatus);
+//            case BAD_REQUEST:
+//                return new ErrorResponse(throwable.getMessage(), httpStatus.value(), httpStatus);
+//            case CONFLICT:
+//                return new ErrorResponse(throwable.getMessage(), DuplicateDataException.CONFLICT_STATUS.value(), DuplicateDataException.CONFLICT_STATUS);
+//            default:
+//                return null;
+//        }
     }
 
 }

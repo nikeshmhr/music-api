@@ -18,4 +18,9 @@ public interface UserService {
 
     User updateUser(User user);
 
+    boolean isUserExists(Long userId);
+
+    boolean isUsernameExists(String username);
+
+    boolean isUsernameValidForExistingUser(String newUserName, Long existingUserId);
 }

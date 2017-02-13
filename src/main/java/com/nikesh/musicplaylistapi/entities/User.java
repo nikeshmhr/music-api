@@ -7,6 +7,8 @@ import lombok.Setter;
 import javax.persistence.*;
 
 /**
+ * User domain object that holds user details.
+ *
  * @author Nikesh Maharjan
  *         nikeshmhr@gmail.com
  */
@@ -20,10 +22,10 @@ public class User extends ModelBase {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column
+    @Column(unique = true, length = 50)
     private String username;
 
-    @Column(length = 50)
+    @Column(length = 100)
     private String password;
 
 }
