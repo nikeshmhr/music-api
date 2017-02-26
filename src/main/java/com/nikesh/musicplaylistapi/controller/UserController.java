@@ -2,8 +2,8 @@ package com.nikesh.musicplaylistapi.controller;
 
 import com.nikesh.musicplaylistapi.constants.ApplicationConstants.ApiConstants;
 import com.nikesh.musicplaylistapi.constants.ApplicationConstants.UserResourceConstants;
-import com.nikesh.musicplaylistapi.dto.request.UserRequestDTO;
-import com.nikesh.musicplaylistapi.dto.response.UserResponseDTO;
+import com.nikesh.musicplaylistapi.dto.request.UserRequestDto;
+import com.nikesh.musicplaylistapi.dto.response.UserResponseDto;
 import com.nikesh.musicplaylistapi.entities.User;
 import com.nikesh.musicplaylistapi.exception.BadDataException;
 import com.nikesh.musicplaylistapi.exception.DuplicateDataException;
@@ -62,12 +62,12 @@ public class UserController {
     /**
      * Resource URI to create new user.
      *
-     * @param userRequest the {@link UserResponseDTO} object with user information.
+     * @param userRequest the {@link UserResponseDto} object with user information.
      * @return information of created user.
      * @throws MethodArgumentNotValidException if value of request body is not valid.
      */
     @PostMapping(value = UserResourceConstants.USER_COLLECTION_BASE)
-    public ResponseEntity<UserResponseDTO> createUser(@RequestBody @Valid UserRequestDTO userRequest)
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody @Valid UserRequestDto userRequest)
             throws MethodArgumentNotValidException {
 
         // Check if user with provided username already exists.
@@ -83,7 +83,7 @@ public class UserController {
 
             if (createdUser != null) {
                 logger.info("User created successfully. Created User :: " + createdUser);
-                UserResponseDTO createdUserDTO = modelMapper.map(createdUser, UserResponseDTO.class);
+                UserResponseDto createdUserDTO = modelMapper.map(createdUser, UserResponseDto.class);
 
                 return new ResponseEntity<>(createdUserDTO, CREATED);
             } else {
@@ -97,10 +97,10 @@ public class UserController {
     /**
      * Resource URI to retrieve all the available users.
      *
-     * @return the list of {@link UserResponseDTO} object
+     * @return the list of {@link UserResponseDto} object
      */
     @GetMapping(value = UserResourceConstants.USER_COLLECTION_BASE)
-    public ResponseEntity<Collection<UserResponseDTO>> getUsers() {
+    public ResponseEntity<Collection<UserResponseDto>> getUsers() {
         // Fetch users.
         Collection<User> allUsers = userService.getAllUsers();
 
@@ -116,17 +116,17 @@ public class UserController {
      * Resource URI to retrieve user by its userId.
      *
      * @param userId the user id to use for searching.
-     * @return {@link UserResponseDTO} object with user's id and username.
+     * @return {@link UserResponseDto} object with user's id and username.
      */
     @GetMapping(value = UserResourceConstants.USER_BY_ID)
-    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long userId) {
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long userId) {
         // Fetch user by their id.
         User userById = userService.getUserById(userId);
 
         if (userById == null) {
             throw new NoRecordFoundException("User not found for id " + userById + "'.");
         } else {    // Otherwise convert to response and return
-            UserResponseDTO responseDTO = modelMapper.map(userById, UserResponseDTO.class);
+            UserResponseDto responseDTO = modelMapper.map(userById, UserResponseDto.class);
 
             return new ResponseEntity<>(responseDTO, HttpStatus.OK);
         }
@@ -136,30 +136,30 @@ public class UserController {
      * Resource URI to update the information of existing user.
      *
      * @param userId         id of the user to update details for
-     * @param userRequestDTO updated information of user
+     * @param userRequestDto updated information of user
      * @return updated user information
      * @throws MethodArgumentNotValidException if any of the properties of request body is not valid
      */
     @PutMapping(value = UserResourceConstants.USER_BY_ID)
-    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long userId, @RequestBody @Valid UserRequestDTO userRequestDTO)
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable Long userId, @RequestBody @Valid UserRequestDto userRequestDto)
             throws MethodArgumentNotValidException {
 
         // Check if user with provided id exists.
         // Only perform update action if it exists.
         if (userService.isUserExists(userId)) {
             // If provided username already exists then throw duplicate username exception
-            if (!userService.isUsernameValidForExistingUser(userRequestDTO.getUsername(), userId)) {
-                throw new DuplicateDataException("Username '" + userRequestDTO.getUsername() + "' already exists.");
+            if (!userService.isUsernameValidForExistingUser(userRequestDto.getUsername(), userId)) {
+                throw new DuplicateDataException("Username '" + userRequestDto.getUsername() + "' already exists.");
             } else {
                 // Convert request object to persistable entity.
-                User user = modelMapper.map(userRequestDTO, User.class);
+                User user = modelMapper.map(userRequestDto, User.class);
                 user.setId(userId);
                 user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
                 // Update/Persist with id set (Primary key set)...
                 User persistedUser = userService.updateUser(user);
 
-                return new ResponseEntity<>(modelMapper.map(persistedUser, UserResponseDTO.class), HttpStatus.OK);
+                return new ResponseEntity<>(modelMapper.map(persistedUser, UserResponseDto.class), HttpStatus.OK);
             }
         } else {    // Otherwise throw BadRequest exception.
             logger.debug("User with user id '" + userId + "' does not exists.");

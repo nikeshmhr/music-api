@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class UserResponseDTO extends ModelBase {
+public class UserResponseDto extends ModelBase {
 
     private long id;
 

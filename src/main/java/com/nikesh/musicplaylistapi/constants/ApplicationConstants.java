@@ -4,7 +4,7 @@ package com.nikesh.musicplaylistapi.constants;
  * @author Nikesh Maharjan
  *         nikeshmhr@gmail.com
  */
-public class ApplicationConstants {
+public final class ApplicationConstants {
 
     public interface DataSourceConstants {
 
@@ -29,6 +29,12 @@ public class ApplicationConstants {
 
         String USER_COLLECTION_BASE = "/users";
         String USER_BY_ID = "/users/{userId}";
+    }
+
+    public interface SongResourceConstants {
+
+        String SONG_COLLECTION_BASE = "/songs";
+        String SONG_BY_ID = "/songs/{songId}";
     }
 
 }

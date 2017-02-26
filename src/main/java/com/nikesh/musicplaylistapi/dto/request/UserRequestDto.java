@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
  */
 @Getter
 @Setter
-public class UserRequestDTO extends ModelBase {
+public class UserRequestDto extends ModelBase {
 
     private long id;
 

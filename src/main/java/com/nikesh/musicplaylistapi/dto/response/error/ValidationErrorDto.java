@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ValidationErrorDTO extends ModelBase {
+public class ValidationErrorDto extends ModelBase {
 
     private String field;
 

@@ -1,7 +1,7 @@
 package com.nikesh.musicplaylistapi.exception;
 
 import com.nikesh.musicplaylistapi.dto.response.error.ErrorResponse;
-import com.nikesh.musicplaylistapi.dto.response.error.ValidationErrorDTO;
+import com.nikesh.musicplaylistapi.dto.response.error.ValidationErrorDto;
 import com.nikesh.musicplaylistapi.factory.ErrorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -34,7 +34,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Collection<ValidationErrorDTO>> processValidationError(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Collection<ValidationErrorDto>> processValidationError(MethodArgumentNotValidException ex) {
         BindingResult result = ex.getBindingResult();
         List<FieldError> fieldErrors = result.getFieldErrors();
 
@@ -56,19 +56,19 @@ public class RestExceptionHandler {
         return new ResponseEntity<>(ErrorFactory.getErrorResponse(ex, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
     }
 
-    private Collection<ValidationErrorDTO> processFieldErrors(List<FieldError> fieldErrors) {
-        Collection<ValidationErrorDTO> validationErrorDTOs = new ArrayList<>();
-        ValidationErrorDTO dto;
+    private Collection<ValidationErrorDto> processFieldErrors(List<FieldError> fieldErrors) {
+        Collection<ValidationErrorDto> validationErrorDtos = new ArrayList<>();
+        ValidationErrorDto dto;
 
         for (FieldError fieldError : fieldErrors) {
-            dto = new ValidationErrorDTO();
+            dto = new ValidationErrorDto();
             // String localizedErrorMessage = resolveLocalizedErrorMessage(fieldError);
             dto.setFieldError(fieldError.getField(), fieldError.getDefaultMessage());
 
-            validationErrorDTOs.add(dto);
+            validationErrorDtos.add(dto);
         }
 
-        return validationErrorDTOs;
+        return validationErrorDtos;
     }
 
     private String resolveLocalizedErrorMessage(FieldError fieldError) {
