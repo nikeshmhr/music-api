@@ -11,17 +11,21 @@ import javax.persistence.*;
  *         nikeshmhr@gmail.com
  */
 @Entity
-@Table(name = "playlists")
+@Table(name = "playlist_songs")
 @Getter
 @Setter
-public class Playlist extends ModelBase {
+public class PlaylistSong extends ModelBase {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "playlist_name", length = 50, nullable = false)
-    private String playlistName;
+    @OneToOne
+    @JoinColumn(name = "playlist_id")
+    private Playlist playlist;
 
-    @Column(name = "number_of_songs")
-    private Integer numberOfSongs;
+    @ManyToOne
+    @JoinColumn(name = "song_id")
+    private Song song;
+
 }

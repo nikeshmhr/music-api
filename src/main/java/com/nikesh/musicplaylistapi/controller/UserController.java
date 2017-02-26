@@ -10,17 +10,25 @@ import com.nikesh.musicplaylistapi.exception.DuplicateDataException;
 import com.nikesh.musicplaylistapi.exception.NoRecordFoundException;
 import com.nikesh.musicplaylistapi.service.UserService;
 import com.nikesh.musicplaylistapi.utility.UserHelper;
+import org.apache.commons.io.IOUtils;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletContext;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 
 import static org.springframework.http.HttpStatus.CREATED;
@@ -40,6 +48,9 @@ public class UserController {
     private final UserService userService;
     private final ModelMapper modelMapper;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    private ServletContext context;
 
     @Autowired
     public UserController(UserService userService, ModelMapper modelMapper, BCryptPasswordEncoder bCryptPasswordEncoder) {
@@ -130,9 +141,7 @@ public class UserController {
      * @throws MethodArgumentNotValidException if any of the properties of request body is not valid
      */
     @PutMapping(value = UserResourceConstants.USER_BY_ID)
-    public ResponseEntity<UserResponseDTO> updateUser(
-            @PathVariable Long userId,
-            @RequestBody @Valid UserRequestDTO userRequestDTO)
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long userId, @RequestBody @Valid UserRequestDTO userRequestDTO)
             throws MethodArgumentNotValidException {
 
         // Check if user with provided id exists.
@@ -156,6 +165,27 @@ public class UserController {
             logger.debug("User with user id '" + userId + "' does not exists.");
             throw new BadDataException("User with user id '" + userId + "' does not exists.");
         }
+    }
+
+    @GetMapping(value = "/audio")
+    public ResponseEntity<InputStreamResource> getAudio() throws IOException {
+        ClassPathResource res = new ClassPathResource("file.mp3");
+
+        return ResponseEntity.ok().contentLength(res.contentLength()).contentType(MediaType.parseMediaType("application/octet-stream"))
+                .body(new InputStreamResource(res.getInputStream()));
+    }
+
+    @GetMapping(value = "/audionew")
+    public ResponseEntity<String> getAudioNew() throws IOException {
+        ClassPathResource res = new ClassPathResource("file.mp3");
+
+
+        InputStream is = res.getInputStream();
+        String base64Encoded = Base64.encodeBase64String(IOUtils.toByteArray(is));
+
+        System.out.println("BASE64 ENCODED :: " + base64Encoded);
+
+        return new ResponseEntity<>(base64Encoded, HttpStatus.OK);
     }
 
 }
