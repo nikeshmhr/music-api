@@ -56,6 +56,11 @@ public class RestExceptionHandler {
         return new ResponseEntity<>(ErrorFactory.getErrorResponse(ex, HttpStatus.CONFLICT), HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(OperationUnsuccessfulException.class)
+    public ResponseEntity<ErrorResponse> handleOperationUnsuccessfulException(OperationUnsuccessfulException ex) {
+        return new ResponseEntity<>(ErrorFactory.getErrorResponse(ex, HttpStatus.EXPECTATION_FAILED), HttpStatus.EXPECTATION_FAILED);
+    }
+
     private Collection<ValidationErrorDto> processFieldErrors(List<FieldError> fieldErrors) {
         Collection<ValidationErrorDto> validationErrorDtos = new ArrayList<>();
         ValidationErrorDto dto;

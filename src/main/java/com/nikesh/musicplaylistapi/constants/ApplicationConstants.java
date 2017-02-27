@@ -37,4 +37,10 @@ public final class ApplicationConstants {
         String SONG_BY_ID = "/songs/{songId}";
     }
 
+    public interface PlaylistResourceConstants {
+
+        String PLAYLIST_COLLECTION_BASE = "/playlists";
+        String PLAYLIST_BY_ID = "/playlists/{playlistId}";
+    }
+
 }
